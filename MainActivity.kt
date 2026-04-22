@@ -1,90 +1,120 @@
-package com.example.atividadepratica
+// MainActivity.kt
+package com.example.atividade
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.atividadepratica.ui.theme.AtividadePraticaTheme
-
+import coil.compose.AsyncImage
+import com.example.atividade.LojaScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AtividadePraticaTheme() {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+            LojaScreen()
+        }
+    }
+}
+
+
+data class Produto(
+    val nome: String,
+    val imagemUrl: String
+)
+
+@Composable
+fun LojaScreen() {
+
+    var listaProdutos by remember {
+        mutableStateOf(
+            listOf(
+                Produto(
+                    "Arara",
+                    "http://www.wikiaves.com.br/wiki/arara-vermelha"
+                ),
+                Produto(
+                    "Lobo-Guará",
+                    "https://pt.quizur.com/trivia/lobo-guara-projeto-animais-em-extincao-1qtHM"
+                ),
+                Produto(
+                    "Tamanduá",
+                    "https://www.correiobraziliense.com.br/aqui/2025/09/04/a-vida-secreta-do-tamandua-bandeira-o-simbolo-do-cerrado/"
+                )
+            )
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.logo_loja),
+            contentDescription = "Logo da loja",
+            modifier = Modifier
+                .size(120.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                listaProdutos = listaProdutos + Produto(
+                    "Novo Produto ${listaProdutos.size + 1}",
+                    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e"
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Adicionar Produto")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyColumn {
+            items(listaProdutos) { produto ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    elevation = CardDefaults.cardElevation(6.dp)
                 ) {
-                    AppNavigation()
+                    Column(
+                        modifier = Modifier.padding(12.dp)
+                    ) {
+
+                        AsyncImage(
+                            model = produto.imagemUrl,
+                            contentDescription = produto.nome,
+                            placeholder = painterResource(R.drawable.loading),
+                            error = painterResource(R.drawable.erro),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = produto.nome,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun AppNavigation() {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "principal") {
-        composable("principal") {
-            Principal(navController = navController)
-        }
-        composable("secundaria") {
-            Secundaria(navController = navController)
-        }
-    }
-}
-@Composable
-fun Principal (navController: NavController) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp).background(color = colorResource(R.color.purple_500)),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally,
-
-    ) {
-        Text(text = "Padaria da Lia", modifier = Modifier.padding(20.dp), color = Color.White, fontSize = 24.sp
-        )
-        Text("Vá para a próxima tela para nos conhecer um pouco mais!", modifier = Modifier.padding(30.dp))
-        Button(onClick = { navController.navigate("secundaria") }) {
-            Text("Ir para a próxima página")
-        }
-    }
-}
-
-@Composable
-fun Secundaria (navController: NavController) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp).background(color = colorResource(R.color.purple_500)),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Sobre a Padaria", fontSize = 25.sp, modifier = Modifier.padding(20.dp), color = Color.White)
-        Text(text = "A Padaria da Lia é um lugar acolhedor, conhecido pelo cheirinho de pão fresco que sai do forno todos os dias." +
-                " Oferece pães, bolos e salgados feitos com carinho, sempre prezando pela qualidade e pelo bom atendimento. " +
-                "É o ponto ideal para começar o dia com um café gostoso ou fazer uma pausa e aproveitar algo saboroso.", fontSize = 20.sp, color = Color.White)
-        Button(onClick = { navController.popBackStack() }) {
-            Text("Voltar para página principal")
         }
     }
 }
